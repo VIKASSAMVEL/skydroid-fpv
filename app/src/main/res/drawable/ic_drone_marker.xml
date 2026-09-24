@@ -1,0 +1,50 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- Quadcopter Body -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M24,18 L27,24 L24,27 L21,24 Z" />
+
+    <!-- Forward Heading Arrow -->
+    <path
+        android:fillColor="#FF2A55"
+        android:pathData="M24,6 L28,15 L24,13 L20,15 Z" />
+
+    <!-- Arms -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M14,14 L34,34 M34,14 L14,34" />
+
+    <!-- Center Hub -->
+    <path
+        android:fillColor="#151A24"
+        android:strokeColor="#00F0FF"
+        android:strokeWidth="1.5"
+        android:pathData="M24,24m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+
+    <!-- Motor 1 (Front-Left) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M14,14m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0" />
+
+    <!-- Motor 2 (Front-Right) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M34,14m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0" />
+
+    <!-- Motor 3 (Rear-Right) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M34,34m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0" />
+
+    <!-- Motor 4 (Rear-Left) -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M14,34m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0" />
+</vector>

@@ -31,9 +31,14 @@ import com.skydroid.fpv.service.DvrRecordingService
 import com.skydroid.fpv.ui.GalleryBottomSheet
 import android.util.Log
 import android.view.PixelCopy
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.transition.TransitionManager
+import com.skydroid.fpv.telemetry.MavlinkTelemetryEngine
+import com.skydroid.fpv.ui.DroneMapController
 import com.skydroid.fpv.usb.SkydroidT12Engine
 import com.skydroid.fpv.usb.UvcProtocolParser
 import com.skydroid.fpv.usb.UsbReceiverManager
+import java.util.Locale
 
 class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListener {
 
@@ -53,12 +58,16 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
     private var dvrRecorder: DvrVideoRecorder? = null
     private var latestFrame: Bitmap? = null
 
+    // Drone Map & MAVLink Telemetry
+    private lateinit var mapController: DroneMapController
+    private val telemetryEngine = MavlinkTelemetryEngine()
+    private var isMapFullscreen = false
+
     // Permissions Request
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
-        val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
         if (cameraGranted) {
             usbManager.scanConnectedDevices()
         } else {
@@ -79,6 +88,7 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
         initRenderers()
         initUsbEngine()
         initControls()
+        initMapAndTelemetry()
         checkPermissions()
     }
 
@@ -194,6 +204,157 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
         }
     }
 
+    private fun initMapAndTelemetry() {
+        mapController = DroneMapController(this, binding.osmMapView)
+
+        // Telemetry listener from MAVLink engine
+        telemetryEngine.onTelemetryUpdated = { data ->
+            runOnUiThread {
+                mapController.updateTelemetry(data)
+                updateTelemetryHud(data)
+            }
+        }
+        telemetryEngine.startUdpListener(MavlinkTelemetryEngine.DEFAULT_UDP_PORT)
+
+        // Mini-Map tap -> Expand to Fullscreen (DJI Fly style)
+        binding.cardMapContainer.setOnClickListener {
+            if (!isMapFullscreen) {
+                vibrate(20)
+                setMapFullscreen(true)
+            }
+        }
+
+        // When Map is fullscreen, tapping the video PiP thumbnail swaps back to FPV video
+        binding.viewportContainer.setOnClickListener {
+            if (isMapFullscreen) {
+                vibrate(20)
+                setMapFullscreen(false)
+            }
+        }
+
+        // Fullscreen map action buttons
+        binding.btnCollapseMap.setOnClickListener {
+            vibrate(20)
+            setMapFullscreen(false)
+        }
+
+        binding.btnMapLayer.setOnClickListener {
+            vibrate(20)
+            val isSat = mapController.toggleMapLayer()
+            binding.btnMapLayer.text = if (isSat) "SAT VIEW" else "STREET VIEW"
+        }
+
+        binding.btnCenterDrone.setOnClickListener {
+            vibrate(20)
+            mapController.centerOnDrone()
+        }
+
+        binding.btnMapZoomIn.setOnClickListener {
+            mapController.zoomIn()
+        }
+
+        binding.btnMapZoomOut.setOnClickListener {
+            mapController.zoomOut()
+        }
+    }
+
+    private fun updateTelemetryHud(data: MavlinkTelemetryEngine.TelemetryData) {
+        // Mini map badge
+        val fixLabel = if (data.hasGpsLock) "SATS: ${data.satellites} (3D)" else "GPS: WAITING"
+        binding.tvMiniMapSats.text = fixLabel
+        binding.tvMiniMapSats.setTextColor(if (data.hasGpsLock) getColor(R.color.fpv_green) else getColor(R.color.fpv_yellow))
+
+        // Fullscreen map telemetry ribbon
+        binding.tvMapFlightMode.text = data.flightMode
+        binding.tvMapFlightMode.setTextColor(if (data.isArmed) getColor(R.color.fpv_green) else getColor(R.color.fpv_yellow))
+
+        if (data.hasGpsLock) {
+            binding.tvMapCoords.text = String.format(Locale.US, "%.5f, %.5f", data.droneLat, data.droneLon)
+        } else {
+            binding.tvMapCoords.text = "NO GPS FIX"
+        }
+
+        binding.tvMapAlt.text = String.format(Locale.US, "ALT: %.1fm", data.relativeAltMeters)
+        binding.tvMapSpeed.text = String.format(Locale.US, "SPD: %.1fm/s", data.groundSpeedMps)
+    }
+
+    private fun setMapFullscreen(fullscreen: Boolean) {
+        TransitionManager.beginDelayedTransition(binding.rootLayout)
+        isMapFullscreen = fullscreen
+
+        val mapParams = binding.cardMapContainer.layoutParams as ConstraintLayout.LayoutParams
+        val videoParams = binding.viewportContainer.layoutParams as ConstraintLayout.LayoutParams
+
+        if (fullscreen) {
+            // Map expands to fill 100% of the screen
+            mapParams.width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            mapParams.height = ConstraintLayout.LayoutParams.MATCH_PARENT
+            mapParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            mapParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            mapParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            mapParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            mapParams.setMargins(0, 0, 0, 0)
+            binding.cardMapContainer.radius = 0f
+            binding.cardMapContainer.strokeWidth = 0
+
+            // Show Map Controls & Telemetry
+            binding.layoutMapControls.visibility = View.VISIBLE
+            binding.layoutMiniMapBadge.visibility = View.GONE
+
+            // Hide standard FPV HUD & floating buttons
+            binding.layoutControlsBar.visibility = View.GONE
+            binding.osdTopLeft.visibility = View.GONE
+            binding.osdBottomLeft.visibility = View.GONE
+
+            // Shrink Video to PiP in bottom-left corner
+            videoParams.width = dpToPx(190f)
+            videoParams.height = dpToPx(125f)
+            videoParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.endToEnd = ConstraintLayout.LayoutParams.UNSET
+            videoParams.topToTop = ConstraintLayout.LayoutParams.UNSET
+            videoParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.setMargins(dpToPx(16f), 0, 0, dpToPx(16f))
+            binding.viewportContainer.elevation = dpToPx(12f).toFloat()
+        } else {
+            // Restore Video to Fullscreen
+            videoParams.width = ConstraintLayout.LayoutParams.MATCH_PARENT
+            videoParams.height = ConstraintLayout.LayoutParams.MATCH_PARENT
+            videoParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.topToTop = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            videoParams.setMargins(0, 0, 0, 0)
+            binding.viewportContainer.elevation = 0f
+
+            // Return Map to floating mini-card at bottom center
+            mapParams.width = dpToPx(190f)
+            mapParams.height = dpToPx(125f)
+            mapParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID
+            mapParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID
+            mapParams.topToTop = ConstraintLayout.LayoutParams.UNSET
+            mapParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
+            mapParams.setMargins(0, 0, 0, dpToPx(16f))
+            binding.cardMapContainer.radius = dpToPx(12f).toFloat()
+            binding.cardMapContainer.strokeWidth = dpToPx(1.5f)
+
+            // Hide Map Controls, show mini badge
+            binding.layoutMapControls.visibility = View.GONE
+            binding.layoutMiniMapBadge.visibility = View.VISIBLE
+
+            // Restore standard FPV HUD & controls
+            binding.layoutControlsBar.visibility = View.VISIBLE
+            binding.osdTopLeft.visibility = View.VISIBLE
+            binding.osdBottomLeft.visibility = View.VISIBLE
+        }
+
+        binding.cardMapContainer.layoutParams = mapParams
+        binding.viewportContainer.layoutParams = videoParams
+    }
+
+    private fun dpToPx(dp: Float): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
+
     private fun toggleRecording() {
         val recorder = dvrRecorder
         if (recorder != null && recorder.isRecording) {
@@ -290,7 +451,9 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
     private fun checkPermissions() {
         val permissions = mutableListOf(
             Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS)
@@ -397,6 +560,12 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
                         }
                     }
                 )
+
+                // Hook MAVLink telemetry stream from non-video USB packets
+                engine.telemetryListener = { bytes, offset, length ->
+                    telemetryEngine.feedBytes(bytes, offset, length)
+                }
+
                 skydroidEngine = engine
                 dvrRecorder?.let { recorder ->
                     if (recorder.isRecording) {
@@ -421,11 +590,19 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
     override fun onResume() {
         super.onResume()
         hideSystemUI()
+        mapController.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mapController.onPause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        telemetryEngine.stopUdpListener()
         skydroidEngine?.setNalListener(null)
+        skydroidEngine?.telemetryListener = null
         skydroidEngine?.stop()
         skydroidEngine = null
         uvcParser.stopStreaming()

@@ -49,6 +49,9 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
 
+    // OpenStreetMap (OSMDroid) for Drone Geolocation Mini-Map & Offline Caching
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

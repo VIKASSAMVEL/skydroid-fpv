@@ -311,4 +311,216 @@
             app:tint="@color/fpv_text_primary" />
     </LinearLayout>
 
+    <!-- ==================== DRONE GEOLOCATION MINI-MAP ==================== -->
+    <!-- Floating Mini-Map Card (Expands to Fullscreen on tap) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_map_container"
+        android:layout_width="190dp"
+        android:layout_height="125dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="@color/fpv_bg_dark"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:strokeColor="@color/fpv_cyan"
+        app:strokeWidth="1.5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- OSMDroid MapView -->
+            <org.osmdroid.views.MapView
+                android:id="@+id/osm_map_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <!-- Mini Map Header Badge (Visible in Mini mode) -->
+            <LinearLayout
+                android:id="@+id/layout_mini_map_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="6dp"
+                android:background="@drawable/bg_osd_badge"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp">
+
+                <TextView
+                    android:id="@+id/tv_mini_map_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MAP ⤢"
+                    android:textColor="@color/fpv_cyan"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_mini_map_sats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="GPS: WAITING"
+                    android:textColor="@color/fpv_text_secondary"
+                    android:textSize="9sp" />
+            </LinearLayout>
+
+            <!-- Fullscreen Map Overlay Controls (Visible only when Map is Expanded) -->
+            <RelativeLayout
+                android:id="@+id/layout_map_controls"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <!-- Top Telemetry Ribbon -->
+                <LinearLayout
+                    android:id="@+id/layout_map_telemetry_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_osd_badge"
+                    android:orientation="horizontal"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:id="@+id/tv_map_flight_mode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="DISARMED"
+                        android:textColor="@color/fpv_yellow"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_map_coords"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="LAT: -- LON: --"
+                        android:textColor="@color/fpv_text_primary"
+                        android:textSize="11sp" />
+
+                    <TextView
+                        android:id="@+id/tv_map_alt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="ALT: 0m"
+                        android:textColor="@color/fpv_cyan"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_map_speed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="SPD: 0m/s"
+                        android:textColor="@color/fpv_text_primary"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <!-- Right Side Map Action Buttons -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="vertical">
+
+                    <!-- Layer Toggle (Satellite vs Street) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_map_layer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/fpv_button_normal"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:text="SAT / MAP"
+                        android:textColor="@color/fpv_cyan"
+                        android:textSize="10sp"
+                        app:cornerRadius="6dp"
+                        app:strokeColor="@color/fpv_cyan"
+                        app:strokeWidth="1dp" />
+
+                    <!-- Center on Drone -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_center_drone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/fpv_button_normal"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:text="CENTER DRONE"
+                        android:textColor="@color/fpv_text_primary"
+                        android:textSize="10sp"
+                        app:cornerRadius="6dp" />
+
+                    <!-- Zoom In -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_map_zoom_in"
+                        android:layout_width="44dp"
+                        android:layout_height="36dp"
+                        android:layout_marginBottom="6dp"
+                        android:backgroundTint="@color/fpv_button_normal"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:text="+"
+                        android:textColor="@color/fpv_text_primary"
+                        android:textSize="16sp"
+                        app:cornerRadius="6dp" />
+
+                    <!-- Zoom Out -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_map_zoom_out"
+                        android:layout_width="44dp"
+                        android:layout_height="36dp"
+                        android:layout_marginBottom="8dp"
+                        android:backgroundTint="@color/fpv_button_normal"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:text="−"
+                        android:textColor="@color/fpv_text_primary"
+                        android:textSize="16sp"
+                        app:cornerRadius="6dp" />
+
+                    <!-- Collapse / Back to FPV Video -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_collapse_map"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:backgroundTint="#80FF1744"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:text="BACK TO FPV"
+                        android:textColor="@color/fpv_text_primary"
+                        android:textSize="10sp"
+                        app:cornerRadius="6dp" />
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

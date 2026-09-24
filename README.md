@@ -29,8 +29,16 @@ It completely replaces the outdated, abandoned proprietary Skydroid app (`FUAV /
   - Instant split-screen stereoscopic view with center divider for smartphone FPV goggles and headsets.
 - 📐 **Aspect Ratio Switching:**
   - Seamless toggle between **4:3 Classic FPV**, **16:9 Widescreen**, and **Fullscreen Stretch**.
-- 📂 **In-App Flight Gallery:**
-  - Integrated bottom-sheet gallery to review recorded flight videos and photos immediately after landing.
+- 🗺️ **Live Drone Geolocation Map (OSMDroid + ESRI Satellite Imagery):**
+  - **100% Free & Keyless**: Powered by OpenStreetMap (OSMDroid) and high-resolution ESRI World Satellite tiles—no Google Maps API keys or billing required.
+  - **DJI Fly-Style Screen Swap**: Tap the bottom-center mini-map to expand to fullscreen; the live video feed smoothly transitions into a picture-in-picture (PiP) window. Tap PiP anytime to swap back.
+  - **Telemetry Flight Tracking**: Dynamic drone marker rotated by live heading, home landing pad marker, and cyan breadcrumb trail of the flight path.
+  - **Layer Toggle**: Instant switch between ESRI Satellite Imagery and OpenStreetMap Street/Topo tiles.
+  - **Offline Tile Cache**: Tiles are cached locally for flying in remote fields without cellular reception.
+- 📡 **MAVLink 1/2 Telemetry Decoder (Pixhawk / ArduPilot / PX4):**
+  - Auto-decodes Pixhawk 2.4.8 telemetry via dual pathways: directly over the Skydroid T12 USB data link and via UDP broadcast (`port 14550`).
+  - Supports `GLOBAL_POSITION_INT`, `GPS_RAW_INT`, `ATTITUDE`, `SYS_STATUS`, `VFR_HUD`, and `HEARTBEAT`.
+  - Live HUD bar displaying GPS lock, satellite count, altitude (AGL), groundspeed, flight mode, armed state, and battery voltage/current.
 - 🛡️ **Modern Android 14/15 Support:**
   - Full Scoped Storage compliance (no dangerous `MANAGE_EXTERNAL_STORAGE` permissions required).
   - Modern USB intent dispatching and foreground service protection.

@@ -30,6 +30,9 @@ class SkydroidT12Engine(
         onFpsUpdate(fps)
     }
 
+    // Telemetry callback for non-video packets
+    var telemetryListener: ((ByteArray, Int, Int) -> Unit)? = null
+
     // Outbound command queue
     private val commandQueue = ConcurrentLinkedQueue<ByteArray>()
 
@@ -125,7 +128,13 @@ class SkydroidT12Engine(
                     if (packetType == 0xA5 && payloadLen > 0) {
                         // Offset 4 is the start of H.264 elementary stream data
                         decoder.feedData(readBuffer, 4, payloadLen)
+                    } else if (payloadLen > 0) {
+                        // Telemetry or data payload
+                        telemetryListener?.invoke(readBuffer, 4, payloadLen)
                     }
+                } else if (bytesRead > 0) {
+                    // Raw bytes (MAVLink stream)
+                    telemetryListener?.invoke(readBuffer, 0, bytesRead)
                 }
             }
 

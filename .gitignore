@@ -27,3 +27,6 @@ local.properties
 captures/
 .externalNativeBuild
 .cxx/
+
+# AI Agent Config
+.agents/
