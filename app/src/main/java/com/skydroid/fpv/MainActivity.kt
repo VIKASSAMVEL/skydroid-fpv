@@ -257,20 +257,20 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
             runOnUiThread {
                 when (state) {
                     BluetoothTelemetryManager.State.CONNECTED -> {
-                        val name = bluetoothManager.connectedDeviceName.ifBlank { "CONNECTED" }
-                        binding.tvOsdBluetooth.text = "📡 BT: $name"
+                        val name = bluetoothManager.connectedDeviceName.ifBlank { "LINKED" }
+                        binding.tvOsdBluetooth.text = "BT: $name"
                         binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_green))
                     }
                     BluetoothTelemetryManager.State.CONNECTING -> {
-                        binding.tvOsdBluetooth.text = "📡 BT: CONNECTING..."
+                        binding.tvOsdBluetooth.text = "BT: CONNECTING"
                         binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_yellow))
                     }
                     BluetoothTelemetryManager.State.ERROR -> {
-                        binding.tvOsdBluetooth.text = "📡 BT: ERROR"
+                        binding.tvOsdBluetooth.text = "BT: ERROR"
                         binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_record_red))
                     }
                     BluetoothTelemetryManager.State.DISCONNECTED -> {
-                        binding.tvOsdBluetooth.text = "📡 BT: OFF"
+                        binding.tvOsdBluetooth.text = "BT: DISCONNECTED"
                         binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_text_secondary))
                     }
                 }
@@ -323,7 +323,7 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
         binding.btnMapLayer.setOnClickListener {
             vibrate(20)
             val isSat = mapController.toggleMapLayer()
-            binding.btnMapLayer.text = if (isSat) "SAT VIEW" else "STREET VIEW"
+            binding.btnMapLayer.text = if (isSat) "SATELLITE" else "STREET"
         }
 
         binding.btnCenterDrone.setOnClickListener {

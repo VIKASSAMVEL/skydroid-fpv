@@ -155,7 +155,7 @@
             android:focusable="true"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:text="📡 BT: OFF"
+            android:text="BT: DISCONNECTED"
             android:textColor="@color/fpv_text_secondary"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -274,7 +274,7 @@
             android:contentDescription="@string/action_vr_mode"
             android:padding="10dp"
             android:scaleType="centerInside"
-            android:src="@android:drawable/ic_menu_view"
+            android:src="@drawable/ic_vr"
             app:tint="@color/fpv_text_primary" />
 
         <!-- Aspect Ratio Toggle (4:3 vs 16:9 Stretch) -->
@@ -287,7 +287,7 @@
             android:contentDescription="@string/action_aspect_ratio"
             android:padding="10dp"
             android:scaleType="centerInside"
-            android:src="@android:drawable/ic_menu_crop"
+            android:src="@drawable/ic_aspect_ratio"
             app:tint="@color/fpv_text_primary" />
 
         <!-- Snapshot Button -->
@@ -300,7 +300,7 @@
             android:contentDescription="@string/action_snapshot"
             android:padding="11dp"
             android:scaleType="centerInside"
-            android:src="@android:drawable/ic_menu_camera"
+            android:src="@drawable/ic_camera"
             app:tint="@color/fpv_cyan" />
 
         <!-- Main DVR Record Button -->
@@ -322,7 +322,7 @@
             android:contentDescription="@string/action_gallery"
             android:padding="10dp"
             android:scaleType="centerInside"
-            android:src="@android:drawable/ic_menu_gallery"
+            android:src="@drawable/ic_gallery"
             app:tint="@color/fpv_text_primary" />
 
         <!-- Settings / Configuration Button -->
@@ -384,10 +384,12 @@
                     android:id="@+id/tv_mini_map_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="MAP ⤢"
+                    android:text="MAP"
                     android:textColor="@color/fpv_cyan"
                     android:textSize="10sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:drawableEndCompat="@drawable/ic_expand"
+                    android:drawablePadding="4dp" />
 
                 <TextView
                     android:id="@+id/tv_mini_map_sats"
@@ -479,10 +481,13 @@
                         android:insetBottom="0dp"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:text="SAT / MAP"
+                        android:text="SATELLITE"
                         android:textColor="@color/fpv_cyan"
                         android:textSize="10sp"
                         app:cornerRadius="6dp"
+                        app:icon="@drawable/ic_layers"
+                        app:iconSize="14dp"
+                        app:iconTint="@color/fpv_cyan"
                         app:strokeColor="@color/fpv_cyan"
                         app:strokeWidth="1dp" />
 
@@ -497,10 +502,13 @@
                         android:insetBottom="0dp"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:text="CENTER DRONE"
+                        android:text="CENTER"
                         android:textColor="@color/fpv_text_primary"
                         android:textSize="10sp"
-                        app:cornerRadius="6dp" />
+                        app:cornerRadius="6dp"
+                        app:icon="@drawable/ic_crosshair"
+                        app:iconSize="14dp"
+                        app:iconTint="@color/fpv_text_primary" />
 
                     <!-- Zoom In -->
                     <com.google.android.material.button.MaterialButton
@@ -511,10 +519,13 @@
                         android:backgroundTint="@color/fpv_button_normal"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:text="+"
-                        android:textColor="@color/fpv_text_primary"
-                        android:textSize="16sp"
-                        app:cornerRadius="6dp" />
+                        android:padding="0dp"
+                        app:cornerRadius="6dp"
+                        app:icon="@drawable/ic_zoom_in"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/fpv_text_primary" />
 
                     <!-- Zoom Out -->
                     <com.google.android.material.button.MaterialButton
@@ -525,10 +536,13 @@
                         android:backgroundTint="@color/fpv_button_normal"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:text="−"
-                        android:textColor="@color/fpv_text_primary"
-                        android:textSize="16sp"
-                        app:cornerRadius="6dp" />
+                        android:padding="0dp"
+                        app:cornerRadius="6dp"
+                        app:icon="@drawable/ic_zoom_out"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="18dp"
+                        app:iconTint="@color/fpv_text_primary" />
 
                     <!-- Collapse / Back to FPV Video -->
                     <com.google.android.material.button.MaterialButton
@@ -540,10 +554,13 @@
                         android:insetBottom="0dp"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
-                        android:text="BACK TO FPV"
+                        android:text="EXIT FULL MAP"
                         android:textColor="@color/fpv_text_primary"
                         android:textSize="10sp"
-                        app:cornerRadius="6dp" />
+                        app:cornerRadius="6dp"
+                        app:icon="@drawable/ic_fullscreen_exit"
+                        app:iconSize="14dp"
+                        app:iconTint="@color/fpv_text_primary" />
                 </LinearLayout>
 
             </RelativeLayout>

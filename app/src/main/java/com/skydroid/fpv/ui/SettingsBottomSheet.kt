@@ -266,9 +266,9 @@ class SettingsBottomSheet(
         val switchHome = view.findViewById<SwitchMaterial>(R.id.switch_map_home_bearing)
 
         val mapLayers = listOf(
-            "🛰️ ESRI World Imagery (High-Res Satellite)",
-            "🗺️ OpenStreetMap Mapnik (Standard Street)",
-            "⛰️ OpenTopoMap (Terrain & Elevation)"
+            "ESRI World Imagery (Satellite)",
+            "OpenStreetMap Standard (Streets)",
+            "OpenTopoMap (Topography)"
         )
         val mapAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, mapLayers)
         spinnerMapLayer.adapter = mapAdapter

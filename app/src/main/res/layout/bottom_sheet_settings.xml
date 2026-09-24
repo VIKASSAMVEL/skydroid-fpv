@@ -22,9 +22,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="⚙️ SkyFPV Configuration"
+                android:text="SYSTEM CONFIGURATION"
                 android:textColor="@color/fpv_cyan"
-                android:textSize="18sp"
+                android:textSize="17sp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -38,7 +38,7 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reset"
+                    android:text="RESET"
                     android:textColor="@color/fpv_text_secondary"
                     android:textSize="12sp" />
 
@@ -49,7 +49,7 @@
                     android:layout_marginStart="8dp"
                     android:background="@drawable/bg_control_button"
                     android:contentDescription="Close"
-                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:src="@drawable/ic_fullscreen_exit"
                     app:tint="@color/fpv_text_primary" />
             </LinearLayout>
         </RelativeLayout>
@@ -60,7 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="📡 BLUETOOTH &amp; MAVLINK TELEMETRY"
+            android:text="TELEMETRY &amp; DATA LINK"
             android:textColor="@color/fpv_cyan"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -182,7 +182,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="📹 VIDEO &amp; CAMERA RECEIVER HARDWARE"
+            android:text="VIDEO RECEIVER &amp; HARDWARE"
             android:textColor="@color/fpv_cyan"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -262,7 +262,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="🗺️ MAP &amp; FLIGHT NAVIGATION"
+            android:text="MAP &amp; SPATIAL NAVIGATION"
             android:textColor="@color/fpv_cyan"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -332,7 +332,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
-            android:text="🔴 DVR FLIGHT RECORDING"
+            android:text="DIGITAL VIDEO RECORDER (DVR)"
             android:textColor="@color/fpv_cyan"
             android:textSize="13sp"
             android:textStyle="bold" />
