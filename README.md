@@ -1,8 +1,11 @@
 # 🛸 SkyFPV - Open Source Skydroid T12 & UVC FPV Ground Station for Android
 
+[![Latest Release](https://img.shields.io/github/v/release/VIKASSAMVEL/skydroid-fpv?color=blue&label=Release)](https://github.com/VIKASSAMVEL/skydroid-fpv/releases/latest)
 [![Platform](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--35)-brightgreen.svg)](https://developer.android.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Hardware](https://img.shields.io/badge/Hardware-Skydroid%20T12%20%7C%205.8G%20UVC-orange.svg)](https://github.com)
+
+[**📥 Download Latest APK (v1.0.0)**](https://github.com/VIKASSAMVEL/skydroid-fpv/releases/download/v1.0.0/SkyFPV_v1.0_Skydroid_FPV.apk)
 
 **SkyFPV** is a high-performance, open-source Android ground station app engineered specifically for the **Skydroid T12 digital FPV transmitter**, as well as standard **5.8GHz OTG UVC receivers** (Eachine ROTG01/ROTG02, FUAV).
 
