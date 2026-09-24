@@ -33,8 +33,11 @@ import android.util.Log
 import android.view.PixelCopy
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.transition.TransitionManager
+import com.skydroid.fpv.config.AppConfig
+import com.skydroid.fpv.telemetry.BluetoothTelemetryManager
 import com.skydroid.fpv.telemetry.MavlinkTelemetryEngine
 import com.skydroid.fpv.ui.DroneMapController
+import com.skydroid.fpv.ui.SettingsBottomSheet
 import com.skydroid.fpv.usb.SkydroidT12Engine
 import com.skydroid.fpv.usb.UvcProtocolParser
 import com.skydroid.fpv.usb.UsbReceiverManager
@@ -43,6 +46,9 @@ import java.util.Locale
 class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListener {
 
     private lateinit var binding: ActivityFpvBinding
+
+    // App Configuration & Hardware Profile
+    private lateinit var config: AppConfig
 
     // USB & UVC Pipeline
     private lateinit var usbManager: UsbReceiverManager
@@ -61,6 +67,7 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
     // Drone Map & MAVLink Telemetry
     private lateinit var mapController: DroneMapController
     private val telemetryEngine = MavlinkTelemetryEngine()
+    private lateinit var bluetoothManager: BluetoothTelemetryManager
     private var isMapFullscreen = false
 
     // Permissions Request
@@ -70,8 +77,14 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
         val cameraGranted = permissions[Manifest.permission.CAMERA] ?: false
         if (cameraGranted) {
             usbManager.scanConnectedDevices()
+        }
+        val btGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions[Manifest.permission.BLUETOOTH_CONNECT] ?: false
         } else {
-            Toast.makeText(this, "Camera permission needed for external USB video feed", Toast.LENGTH_LONG).show()
+            true
+        }
+        if (btGranted && config.autoConnectBluetooth && config.bluetoothDeviceAddress.isNotBlank()) {
+            bluetoothManager.connectByAddress(config.bluetoothDeviceAddress)
         }
     }
 
@@ -194,6 +207,18 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
             gallerySheet.show(supportFragmentManager, "GalleryBottomSheet")
         }
 
+        // Settings / Configuration Button
+        binding.btnSettings.setOnClickListener {
+            vibrate(20)
+            showSettingsDialog()
+        }
+
+        // Top OSD Bluetooth Badge tap
+        binding.tvOsdBluetooth.setOnClickListener {
+            vibrate(20)
+            showSettingsDialog()
+        }
+
         // Retry USB Scan button
         binding.btnRetryUsb.setOnClickListener {
             vibrate(20)
@@ -204,8 +229,65 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
         }
     }
 
+    private fun showSettingsDialog() {
+        val sheet = SettingsBottomSheet(bluetoothManager) {
+            applyConfiguration()
+        }
+        sheet.show(supportFragmentManager, "SettingsBottomSheet")
+    }
+
+    private fun applyConfiguration() {
+        mapController.applyConfig(config)
+        if (config.telemetrySource == AppConfig.TELEMETRY_SOURCE_BLUETOOTH) {
+            if (bluetoothManager.currentState == BluetoothTelemetryManager.State.DISCONNECTED &&
+                config.bluetoothDeviceAddress.isNotBlank() &&
+                bluetoothManager.hasBluetoothPermission()
+            ) {
+                bluetoothManager.connectByAddress(config.bluetoothDeviceAddress)
+            }
+        } else if (config.telemetrySource == AppConfig.TELEMETRY_SOURCE_DISABLED) {
+            bluetoothManager.disconnect()
+        }
+    }
+
     private fun initMapAndTelemetry() {
+        config = AppConfig.getInstance(this)
+        bluetoothManager = BluetoothTelemetryManager(this, telemetryEngine)
+        bluetoothManager.onStateChanged = { state, _ ->
+            runOnUiThread {
+                when (state) {
+                    BluetoothTelemetryManager.State.CONNECTED -> {
+                        val name = bluetoothManager.connectedDeviceName.ifBlank { "CONNECTED" }
+                        binding.tvOsdBluetooth.text = "📡 BT: $name"
+                        binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_green))
+                    }
+                    BluetoothTelemetryManager.State.CONNECTING -> {
+                        binding.tvOsdBluetooth.text = "📡 BT: CONNECTING..."
+                        binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_yellow))
+                    }
+                    BluetoothTelemetryManager.State.ERROR -> {
+                        binding.tvOsdBluetooth.text = "📡 BT: ERROR"
+                        binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_record_red))
+                    }
+                    BluetoothTelemetryManager.State.DISCONNECTED -> {
+                        binding.tvOsdBluetooth.text = "📡 BT: OFF"
+                        binding.tvOsdBluetooth.setTextColor(getColor(R.color.fpv_text_secondary))
+                    }
+                }
+            }
+        }
+
         mapController = DroneMapController(this, binding.osmMapView)
+        mapController.applyConfig(config)
+
+        // Auto-connect to saved Bluetooth device if enabled
+        if (config.telemetrySource == AppConfig.TELEMETRY_SOURCE_BLUETOOTH &&
+            config.autoConnectBluetooth &&
+            config.bluetoothDeviceAddress.isNotBlank() &&
+            bluetoothManager.hasBluetoothPermission()
+        ) {
+            bluetoothManager.connectByAddress(config.bluetoothDeviceAddress)
+        }
 
         // Telemetry listener from MAVLink engine
         telemetryEngine.onTelemetryUpdated = { data ->
@@ -214,7 +296,7 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
                 updateTelemetryHud(data)
             }
         }
-        telemetryEngine.startUdpListener(MavlinkTelemetryEngine.DEFAULT_UDP_PORT)
+        telemetryEngine.startUdpListener(config.udpTelemetryPort)
 
         // Mini-Map tap -> Expand to Fullscreen (DJI Fly style)
         binding.cardMapContainer.setOnClickListener {
@@ -374,7 +456,13 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
         } else {
             // Start recording
             val engine = skydroidEngine
-            val newRecorder = DvrVideoRecorder(this, width = 640, height = 360, frameRate = 30)
+            val newRecorder = DvrVideoRecorder(
+                context = this,
+                width = 640,
+                height = 360,
+                frameRate = 30,
+                enableAudio = config.recordAudio
+            )
 
             val started = if (engine != null) {
                 // Direct H.264 bitstream recording for Skydroid T12
@@ -455,6 +543,13 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+            permissions.add(Manifest.permission.BLUETOOTH_SCAN)
+        } else {
+            permissions.add(Manifest.permission.BLUETOOTH)
+            permissions.add(Manifest.permission.BLUETOOTH_ADMIN)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -600,6 +695,7 @@ class MainActivity : AppCompatActivity(), UsbReceiverManager.UsbConnectionListen
 
     override fun onDestroy() {
         super.onDestroy()
+        bluetoothManager.disconnect()
         telemetryEngine.stopUdpListener()
         skydroidEngine?.setNalListener(null)
         skydroidEngine?.telemetryListener = null

@@ -14,6 +14,7 @@ import android.hardware.usb.UsbManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.skydroid.fpv.config.AppConfig
 
 /**
  * Manages USB-OTG connection, permissions, and interface claiming for
@@ -241,9 +242,12 @@ class UsbReceiverManager(
                     connection.claimInterface(streamingInterface, false)
                 }
 
+                val config = AppConfig.getInstance(context)
                 val isCp210x = (device.vendorId == 0x10C4 || device.vendorId == 4292)
-                if (isCp210x) {
-                    configureCp210x(connection, 4000000)
+                if (isCp210x || config.receiverMode == AppConfig.RECEIVER_MODE_CUSTOM_UART || config.receiverMode == AppConfig.RECEIVER_MODE_SKYDROID_T12) {
+                    val baudRate = config.usbBaudRate
+                    Log.i(TAG, "Configuring UART bridge with baud rate: $baudRate")
+                    configureCp210x(connection, baudRate)
                 }
 
                 this.activeDevice = device

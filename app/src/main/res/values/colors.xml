@@ -19,6 +19,7 @@
     <color name="fpv_text_muted">#546E7A</color>
 
     <!-- UI Elements -->
+    <color name="fpv_control_bg">#141B22</color>
     <color name="fpv_button_normal">#263238</color>
     <color name="fpv_button_pressed">#37474F</color>
     <color name="fpv_divider">#1F2A33</color>

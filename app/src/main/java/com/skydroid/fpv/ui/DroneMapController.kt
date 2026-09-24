@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.skydroid.fpv.R
+import com.skydroid.fpv.config.AppConfig
 import com.skydroid.fpv.telemetry.MavlinkTelemetryEngine
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
@@ -202,6 +203,28 @@ class DroneMapController(
 
     fun zoomOut() {
         mapView.controller.zoomOut()
+    }
+
+    fun applyConfig(config: AppConfig) {
+        autoFollowDrone = config.mapAutoFollow
+        flightPathPolyline?.isVisible = config.showFlightTrail
+        homeBearingLine?.isVisible = config.showBearingLine
+        
+        when (config.mapDefaultLayer) {
+            AppConfig.MAP_LAYER_SATELLITE -> {
+                mapView.setTileSource(esriSatelliteTileSource)
+                isSatelliteMode = true
+            }
+            AppConfig.MAP_LAYER_STREET -> {
+                mapView.setTileSource(TileSourceFactory.MAPNIK)
+                isSatelliteMode = false
+            }
+            AppConfig.MAP_LAYER_TOPO -> {
+                mapView.setTileSource(TileSourceFactory.OpenTopo)
+                isSatelliteMode = false
+            }
+        }
+        mapView.invalidate()
     }
 
     fun onResume() {
