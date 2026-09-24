@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. -->
+    <style name="Theme.SkyFPV" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/fpv_cyan</item>
+        <item name="colorSecondary">@color/fpv_green</item>
+        <item name="android:statusBarColor">@color/fpv_bg_dark</item>
+        <item name="android:navigationBarColor">@color/fpv_bg_dark</item>
+        <item name="android:windowBackground">@color/fpv_bg_dark</item>
+    </style>
+
+    <!-- Immersive Fullscreen theme for FPV viewfinder -->
+    <style name="Theme.SkyFPV.Fullscreen" parent="Theme.SkyFPV">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>

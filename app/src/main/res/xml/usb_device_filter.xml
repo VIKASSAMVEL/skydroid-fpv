@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- USB Video Class (UVC) devices: Interface class 14 (0x0E) -->
+    <usb-device class="14" />
+    <!-- Miscellaneous device class (0xEF) commonly used for composite UVC webcams -->
+    <usb-device class="239" />
+    <!-- Filter for standard USB Video Class interfaces -->
+    <usb-device class="239" subclass="2" protocol="1" />
+</resources>

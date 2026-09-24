@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/fpv_bg_dark"
+    tools:context=".MainActivity">
+
+    <!-- FPV Video Viewport Container (Single or VR Dual View) -->
+    <FrameLayout
+        android:id="@+id/viewport_container"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Single View Surface -->
+        <SurfaceView
+            android:id="@+id/fpv_surface_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+
+        <!-- VR Dual Screen View (Gone by default, enabled in VR Mode) -->
+        <LinearLayout
+            android:id="@+id/vr_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <!-- Left Eye Viewport -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <SurfaceView
+                    android:id="@+id/vr_surface_left"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+            <!-- Center Divider for Goggles -->
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:background="#44FFFFFF" />
+
+            <!-- Right Eye Viewport -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <SurfaceView
+                    android:id="@+id/vr_surface_right"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Disconnected State Overlay -->
+    <LinearLayout
+        android:id="@+id/layout_disconnected_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_prompt_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_disconnected"
+            android:textColor="@color/fpv_cyan"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_prompt_subtitle"
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="@string/prompt_connect_receiver"
+            android:textColor="@color/fpv_text_secondary"
+            android:textSize="14sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_retry_usb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/fpv_button_normal"
+            android:text="Scan USB Devices"
+            android:textColor="@color/fpv_cyan"
+            app:cornerRadius="8dp"
+            app:strokeColor="@color/fpv_cyan"
+            app:strokeWidth="1dp" />
+    </LinearLayout>
+
+    <!-- ==================== ON-SCREEN DISPLAY (OSD) ==================== -->
+    <!-- Top-Left OSD (Receiver, Lock, Resolution) -->
+    <LinearLayout
+        android:id="@+id/osd_top_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_osd_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_osd_badge"
+            android:text="@string/status_connected"
+            android:textColor="@color/fpv_green"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_osd_resolution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_osd_badge"
+            android:text="640x480"
+            android:textColor="@color/fpv_text_primary"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Top-Right OSD (REC Indicator, Timer, FPS) -->
+    <LinearLayout
+        android:id="@+id/osd_top_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Recording Indicator Container -->
+        <LinearLayout
+            android:id="@+id/layout_rec_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_osd_badge"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <View
+                android:id="@+id/view_rec_dot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_rec_indicator" />
+
+            <TextView
+                android:id="@+id/tv_rec_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/osd_rec"
+                android:textColor="@color/fpv_record_red"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_rec_timer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/osd_timer_default"
+                android:textColor="@color/fpv_text_primary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_osd_fps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_osd_badge"
+            android:text="30 FPS"
+            android:textColor="@color/fpv_cyan"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Bottom-Left OSD (Storage & Audio Info) -->
+    <LinearLayout
+        android:id="@+id/osd_bottom_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_osd_storage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_osd_badge"
+            android:text="STORAGE READY"
+            android:textColor="@color/fpv_text_secondary"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/tv_osd_aspect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_osd_badge"
+            android:text="4:3 FPV"
+            android:textColor="@color/fpv_text_secondary"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- ==================== FLOATING CONTROLS (Right Side) ==================== -->
+    <LinearLayout
+        android:id="@+id/layout_controls_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- VR Mode Toggle -->
+        <ImageButton
+            android:id="@+id/btn_toggle_vr"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_control_button"
+            android:contentDescription="@string/action_vr_mode"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_menu_view"
+            app:tint="@color/fpv_text_primary" />
+
+        <!-- Aspect Ratio Toggle (4:3 vs 16:9 Stretch) -->
+        <ImageButton
+            android:id="@+id/btn_toggle_aspect"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/bg_control_button"
+            android:contentDescription="@string/action_aspect_ratio"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_menu_crop"
+            app:tint="@color/fpv_text_primary" />
+
+        <!-- Snapshot Button -->
+        <ImageButton
+            android:id="@+id/btn_snapshot"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginBottom="14dp"
+            android:background="@drawable/bg_control_button"
+            android:contentDescription="@string/action_snapshot"
+            android:padding="11dp"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_menu_camera"
+            app:tint="@color/fpv_cyan" />
+
+        <!-- Main DVR Record Button -->
+        <ImageButton
+            android:id="@+id/btn_record"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="14dp"
+            android:background="@drawable/bg_rec_button"
+            android:contentDescription="@string/action_record_start"
+            android:scaleType="center" />
+
+        <!-- Recorded Gallery Button -->
+        <ImageButton
+            android:id="@+id/btn_gallery"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_control_button"
+            android:contentDescription="@string/action_gallery"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_menu_gallery"
+            app:tint="@color/fpv_text_primary" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

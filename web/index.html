@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SkyFPV DVR - 5.8GHz Receiver & Flight Recorder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-dark">
+  <!-- Immersive App Container -->
+  <div class="fpv-app-container" id="appContainer">
+
+    <!-- Viewport Area -->
+    <main class="fpv-viewport-wrapper" id="viewportWrapper" data-aspect="4-3">
+      <!-- Live Video Elements (Single & VR Split) -->
+      <div class="video-container" id="videoContainer">
+        <!-- Single Screen Mode -->
+        <div class="viewport single-viewport active" id="singleViewport">
+          <video id="liveVideo" autoplay playsinline muted></video>
+          <canvas id="simCanvas" class="sim-canvas"></canvas>
+          <div class="analog-scanlines" id="scanlinesOverlay"></div>
+        </div>
+
+        <!-- VR Dual Screen Mode -->
+        <div class="viewport vr-viewport" id="vrViewport">
+          <div class="vr-eye left-eye">
+            <canvas id="vrCanvasLeft" class="vr-canvas"></canvas>
+            <div class="analog-scanlines"></div>
+          </div>
+          <div class="vr-divider"></div>
+          <div class="vr-eye right-eye">
+            <canvas id="vrCanvasRight" class="vr-canvas"></canvas>
+            <div class="analog-scanlines"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Signal Prompt Overlay -->
+      <div class="no-signal-overlay" id="noSignalOverlay">
+        <div class="hud-box no-signal-box">
+          <div class="radar-ping"></div>
+          <h2 class="alert-title">NO 5.8GHz SIGNAL</h2>
+          <p class="alert-desc">Connect OTG FPV Receiver via USB or start the built-in FPV Flight Simulator.</p>
+          <div class="prompt-actions">
+            <button class="btn btn-primary" id="btnConnectUsb">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H7M15 19H9"/></svg>
+              Select USB / UVC Device
+            </button>
+            <button class="btn btn-secondary" id="btnStartSim">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg>
+              Launch FPV Simulator
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tactical OSD Telemetry Layer -->
+      <div class="osd-layer" id="osdLayer">
+        <!-- Top Left: Receiver Status, Band/Channel & Resolution -->
+        <div class="osd-cluster top-left">
+          <div class="osd-pill" id="osdStatusPill">
+            <span class="status-indicator" id="statusDot"></span>
+            <span id="osdStatusText">SEARCHING</span>
+          </div>
+          <div class="osd-pill mono" id="osdChannel">R1: 5658 MHz</div>
+          <div class="osd-pill mono" id="osdRes">640×480</div>
+        </div>
+
+        <!-- Top Right: Live FPS & DVR Recording Badge -->
+        <div class="osd-cluster top-right">
+          <div class="osd-pill rec-pill" id="osdRecPill" style="display: none;">
+            <span class="rec-dot"></span>
+            <span class="rec-text">REC</span>
+            <span class="rec-timer mono" id="osdRecTimer">00:00:00</span>
+          </div>
+          <div class="osd-pill mono" id="osdFps">60 FPS</div>
+          <div class="osd-pill" id="osdAudioPill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+            <span id="osdAudioText">MIC ON</span>
+          </div>
+        </div>
+
+        <!-- Artificial Horizon Pitch Ladder & Flight Crosshair -->
+        <div class="osd-center-crosshair">
+          <div class="pitch-ladder" id="pitchLadder">
+            <div class="ladder-bar bar-up">+10</div>
+            <div class="ladder-center">
+              <span class="reticle-left"></span>
+              <span class="reticle-dot"></span>
+              <span class="reticle-right"></span>
+            </div>
+            <div class="ladder-bar bar-down">-10</div>
+          </div>
+        </div>
+
+        <!-- Bottom Left: Storage & Aspect Ratio -->
+        <div class="osd-cluster bottom-left">
+          <div class="osd-pill mono" id="osdStorage">STORAGE READY</div>
+          <div class="osd-pill mono" id="osdAspect">4:3 NATIVE</div>
+          <div class="osd-pill mono" id="osdSignal">RSSI 98%</div>
+        </div>
+      </div>
+
+      <!-- Floating Tactical Controls Bar (Right Side in Landscape) -->
+      <nav class="tactical-controls-bar">
+        <!-- VR Split Mode Toggle -->
+        <button class="tactical-btn" id="btnToggleVr" title="Toggle VR Goggles Mode (Dual View)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="4"/><circle cx="8" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/></svg>
+        </button>
+
+        <!-- Aspect Ratio Toggle -->
+        <button class="tactical-btn" id="btnToggleAspect" title="Aspect Ratio (4:3 / 16:9 / Fill)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/></svg>
+        </button>
+
+        <!-- Analog Static & Scanlines Toggle -->
+        <button class="tactical-btn active" id="btnToggleScanlines" title="Analog Scanlines Filter">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4h20M2 8h20M2 12h20M2 16h20M2 20h20"/></svg>
+        </button>
+
+        <!-- Snapshot Button -->
+        <button class="tactical-btn btn-snap" id="btnSnapshot" title="Capture Still Photo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+
+        <!-- Main DVR Record Trigger -->
+        <button class="tactical-btn btn-record" id="btnRecord" title="Start/Stop DVR Flight Recording">
+          <div class="rec-icon-inner"></div>
+        </button>
+
+        <!-- Flight Gallery Button -->
+        <button class="tactical-btn" id="btnGallery" title="View Recorded Flights">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+
+        <!-- Settings Modal Toggle -->
+        <button class="tactical-btn" id="btnSettings" title="FPV Settings & Device Config">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </nav>
+    </main>
+
+    <!-- Flight Gallery Modal Sheet -->
+    <div class="modal-backdrop" id="galleryModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <h3>Flight Recordings &amp; Photos</h3>
+            <span class="media-count" id="galleryCount">0 files</span>
+          </div>
+          <button class="btn-close" id="btnCloseGallery">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="gallery-grid" id="galleryGrid">
+            <!-- Dynamic Media Cards -->
+          </div>
+          <div class="gallery-empty" id="galleryEmpty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <p>No recorded flights yet.<br>Tap the red REC button to record live 5.8GHz video.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-backdrop" id="settingsModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>SkyFPV Receiver Configuration</h3>
+          <button class="btn-close" id="btnCloseSettings">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-row">
+            <label for="videoDeviceSelect">Active Video Capture Device:</label>
+            <select id="videoDeviceSelect" class="form-select">
+              <option value="">Default Camera / Receiver</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <label for="streamResSelect">Target Stream Resolution:</label>
+            <select id="streamResSelect" class="form-select">
+              <option value="640x480" selected>640 × 480 (Analog NTSC Standard)</option>
+              <option value="720x576">720 × 576 (Analog PAL Standard)</option>
+              <option value="1280x720">1280 × 720 (HD FPV Digital Feed)</option>
+            </select>
+          </div>
+          <div class="setting-row checkbox-row">
+            <input type="checkbox" id="chkAudioRecord" checked>
+            <label for="chkAudioRecord">Record Microphone / Cockpit Audio in DVR</label>
+          </div>
+          <div class="setting-row checkbox-row">
+            <input type="checkbox" id="chkStaticNoise">
+            <label for="chkStaticNoise">Simulate 5.8GHz VTX Analog Interference</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

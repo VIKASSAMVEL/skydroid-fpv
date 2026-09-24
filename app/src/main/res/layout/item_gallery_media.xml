@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:layout_margin="4dp"
+    app:cardBackgroundColor="@color/fpv_button_normal"
+    app:cardCornerRadius="6dp"
+    app:cardElevation="2dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/img_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <!-- Overlay type badge (Video play icon or Photo) -->
+        <ImageView
+            android:id="@+id/img_media_type"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:src="@android:drawable/ic_media_play"
+            app:tint="@color/fpv_text_primary" />
+
+        <TextView
+            android:id="@+id/tv_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="4dp"
+            android:background="#AA000000"
+            android:padding="2dp"
+            android:textColor="@color/fpv_text_primary"
+            android:textSize="10sp" />
+    </FrameLayout>
+
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,665 @@
+/* ==========================================================================
+   SkyFPV DVR - Tactical OLED Design System (UI/UX Pro Max Certified)
+   ========================================================================== */
+
+:root {
+  --color-bg-dark: #080C10;
+  --color-surface: #141B22;
+  --color-surface-translucent: rgba(20, 27, 34, 0.75);
+  --color-surface-hover: #1C2631;
+  --color-border-glow: rgba(0, 229, 255, 0.25);
+
+  --color-cyan: #00E5FF;
+  --color-cyan-glow: rgba(0, 229, 255, 0.35);
+  --color-green: #00E676;
+  --color-green-glow: rgba(0, 230, 118, 0.3);
+  --color-record-red: #FF1744;
+  --color-record-glow: rgba(255, 23, 68, 0.45);
+  --color-yellow: #FFD600;
+
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #90A4AE;
+  --color-text-muted: #546E7A;
+
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--color-bg-dark);
+  font-family: var(--font-main);
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+/* App Main Container */
+.fpv-app-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  background-color: #000000;
+  overflow: hidden;
+}
+
+/* Viewport Wrapper */
+.fpv-viewport-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Aspect Ratio Presets */
+.fpv-viewport-wrapper[data-aspect="4-3"] .single-viewport {
+  aspect-ratio: 4 / 3;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.fpv-viewport-wrapper[data-aspect="16-9"] .single-viewport {
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.fpv-viewport-wrapper[data-aspect="fill"] .single-viewport {
+  width: 100%;
+  height: 100%;
+}
+
+/* Viewport Canvas & Video */
+.viewport {
+  position: relative;
+  display: none;
+  background-color: #000000;
+  overflow: hidden;
+}
+
+.viewport.active {
+  display: flex;
+}
+
+.single-viewport {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.single-viewport video,
+.single-viewport .sim-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* VR Dual-Screen Viewport */
+.vr-viewport {
+  width: 100%;
+  height: 100%;
+  flex-direction: row;
+}
+
+.vr-eye {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #000000;
+}
+
+.vr-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.vr-divider {
+  width: 2px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+/* Analog Scanlines CRT Filter */
+.analog-scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+  background-size: 100% 4px;
+  z-index: 5;
+  opacity: 0.65;
+  transition: opacity var(--transition-normal);
+}
+
+.analog-scanlines.hidden {
+  opacity: 0;
+}
+
+/* No Signal Prompt */
+.no-signal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(12, 18, 26, 0.85) 0%, rgba(8, 12, 16, 0.98) 100%);
+  z-index: 20;
+  backdrop-filter: blur(8px);
+}
+
+.no-signal-overlay.hidden {
+  display: none;
+}
+
+.hud-box {
+  background: var(--color-surface-translucent);
+  border: 1px solid var(--color-border-glow);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 229, 255, 0.15);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  max-width: 440px;
+}
+
+.radar-ping {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid var(--color-cyan);
+  margin: 0 auto 16px;
+  position: relative;
+  animation: radar-pulse 2s infinite ease-out;
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.6); opacity: 1; box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.7); }
+  70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 16px rgba(0, 229, 255, 0); }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+.alert-title {
+  color: var(--color-cyan);
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.alert-desc {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary {
+  background: var(--color-cyan);
+  color: #000000;
+  box-shadow: 0 4px 14px var(--color-cyan-glow);
+}
+
+.btn-primary:hover {
+  background: #33EBFF;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-secondary:hover {
+  background: #253342;
+  border-color: var(--color-cyan);
+}
+
+/* Tactical OSD Telemetry Layer */
+.osd-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.osd-cluster {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.osd-cluster.top-left {
+  grid-column: 1;
+  grid-row: 1;
+  justify-content: flex-start;
+}
+
+.osd-cluster.top-right {
+  grid-column: 2;
+  grid-row: 1;
+  justify-content: flex-end;
+  padding-right: 68px; /* space for tactical floating bar */
+}
+
+.osd-cluster.bottom-left {
+  grid-column: 1 / span 2;
+  grid-row: 2;
+  align-self: flex-end;
+  justify-content: flex-start;
+}
+
+.osd-pill {
+  background: var(--color-surface-translucent);
+  border: 1px solid var(--color-border-glow);
+  backdrop-filter: blur(4px);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--color-text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.osd-pill.mono {
+  font-family: var(--font-mono);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-yellow);
+}
+
+.status-indicator.connected {
+  background-color: var(--color-green);
+  box-shadow: 0 0 6px var(--color-green);
+}
+
+.status-indicator.streaming {
+  background-color: var(--color-cyan);
+  box-shadow: 0 0 6px var(--color-cyan);
+}
+
+/* OSD Recording Pill */
+.rec-pill {
+  border-color: rgba(255, 23, 68, 0.4) !important;
+}
+
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--color-record-red);
+  box-shadow: 0 0 8px var(--color-record-red);
+  animation: rec-blink 1s infinite alternate;
+}
+
+@keyframes rec-blink {
+  0% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+.rec-text {
+  color: var(--color-record-red);
+  font-weight: 700;
+}
+
+/* Center Pitch Ladder / Crosshair */
+.osd-center-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.pitch-ladder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  color: var(--color-cyan);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.ladder-bar {
+  border-top: 1px dashed var(--color-cyan);
+  width: 50px;
+  text-align: center;
+  padding-top: 2px;
+}
+
+.ladder-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reticle-left, .reticle-right {
+  width: 24px;
+  height: 2px;
+  background-color: var(--color-cyan);
+}
+
+.reticle-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-cyan);
+}
+
+/* Floating Tactical Controls Bar */
+.tactical-controls-bar {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 15;
+}
+
+.tactical-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-surface-translucent);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.tactical-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
+  transform: scale(1.06);
+}
+
+.tactical-btn:active {
+  transform: scale(0.95);
+}
+
+.tactical-btn.active {
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
+  box-shadow: 0 0 12px var(--color-cyan-glow);
+}
+
+/* DVR Record Button */
+.btn-record {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid #FFFFFF;
+  background: var(--color-surface-translucent);
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.7);
+}
+
+.rec-icon-inner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--color-record-red);
+  transition: all var(--transition-fast);
+  box-shadow: 0 0 10px var(--color-record-glow);
+}
+
+.btn-record.recording {
+  border-color: var(--color-record-red);
+  box-shadow: 0 0 20px var(--color-record-glow);
+}
+
+.btn-record.recording .rec-icon-inner {
+  border-radius: 4px;
+  transform: scale(0.85);
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-glow);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.15);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 620px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.media-count {
+  font-size: 12px;
+  color: var(--color-cyan);
+  font-family: var(--font-mono);
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.btn-close:hover {
+  color: #FFFFFF;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Gallery Grid */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.gallery-card {
+  position: relative;
+  background: var(--color-surface-hover);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all var(--transition-fast);
+}
+
+.gallery-card:hover {
+  border-color: var(--color-cyan);
+  transform: translateY(-2px);
+}
+
+.card-media-preview {
+  width: 100%;
+  height: 100px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.card-media-preview video,
+.card-media-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-meta {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+}
+
+.btn-card-action {
+  background: none;
+  border: none;
+  color: var(--color-cyan);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.gallery-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-text-muted);
+}
+
+.gallery-empty svg {
+  margin-bottom: 12px;
+}
+
+/* Settings Form */
+.setting-row {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setting-row.checkbox-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-select {
+  background: var(--color-surface-hover);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-family: var(--font-main);
+  outline: none;
+}
+
+.form-select:focus {
+  border-color: var(--color-cyan);
+}

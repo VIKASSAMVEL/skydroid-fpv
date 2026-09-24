@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SkyFPV DVR</string>
+    <string name="status_disconnected">NO OTG RECEIVER DETECTED</string>
+    <string name="status_connected">RECEIVER CONNECTED</string>
+    <string name="status_streaming">UVC FEED ACTIVE</string>
+    <string name="prompt_connect_receiver">Connect your 5.8GHz OTG FPV receiver cable to your phone to begin live streaming and DVR recording.</string>
+    <string name="permission_required_title">Permissions Required</string>
+    <string name="permission_required_desc">SkyFPV needs Camera access (for external USB video) and Microphone access (for cockpit audio recording).</string>
+    <string name="btn_grant_permissions">Grant Permissions</string>
+    
+    <!-- OSD Labels -->
+    <string name="osd_rec">REC</string>
+    <string name="osd_fps_format">%d FPS</string>
+    <string name="osd_res_format">%1$dx%2$d</string>
+    <string name="osd_timer_default">00:00:00</string>
+    <string name="osd_signal_ok">SIGNAL LOCK</string>
+    
+    <!-- Actions -->
+    <string name="action_record_start">Start Recording</string>
+    <string name="action_record_stop">Stop Recording</string>
+    <string name="action_snapshot">Snapshot</string>
+    <string name="action_vr_mode">VR Split Mode</string>
+    <string name="action_aspect_ratio">Aspect Ratio</string>
+    <string name="action_gallery">Flight Gallery</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_dvr">DVR Recording</string>
+    <string name="notif_channel_dvr_desc">Ongoing flight recording notification</string>
+    <string name="notif_recording_title">SkyFPV DVR Active</string>
+    <string name="notif_recording_text">Recording FPV flight video to Gallery...</string>
+</resources>

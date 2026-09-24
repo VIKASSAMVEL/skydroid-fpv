@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <!-- Stop recording state (Red square in circle) -->
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <stroke android:width="3dp" android:color="@color/fpv_record_red" />
+                    <solid android:color="#22FF1744" />
+                    <size android:width="64dp" android:height="64dp" />
+                </shape>
+            </item>
+            <item android:bottom="20dp" android:left="20dp" android:right="20dp" android:top="20dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/fpv_record_red" />
+                    <corners android:radius="4dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <!-- Start recording state (Red solid circle in border) -->
+        <layer-list>
+            <item>
+                <shape android:shape="oval">
+                    <stroke android:width="3dp" android:color="#FFFFFFFF" />
+                    <solid android:color="@color/fpv_surface_translucent" />
+                    <size android:width="64dp" android:height="64dp" />
+                </shape>
+            </item>
+            <item android:bottom="16dp" android:left="16dp" android:right="16dp" android:top="16dp">
+                <shape android:shape="oval">
+                    <solid android:color="@color/fpv_record_red" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

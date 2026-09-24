@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Backgrounds -->
+    <color name="fpv_bg_dark">#080C10</color>
+    <color name="fpv_surface">#141B22</color>
+    <color name="fpv_surface_translucent">#99141B22</color>
+    <color name="fpv_overlay_scrim">#66000000</color>
+
+    <!-- FPV Status & Accents -->
+    <color name="fpv_cyan">#00E5FF</color>
+    <color name="fpv_green">#00E676</color>
+    <color name="fpv_record_red">#FF1744</color>
+    <color name="fpv_record_red_glow">#66FF1744</color>
+    <color name="fpv_yellow">#FFD600</color>
+
+    <!-- Text -->
+    <color name="fpv_text_primary">#FFFFFF</color>
+    <color name="fpv_text_secondary">#90A4AE</color>
+    <color name="fpv_text_muted">#546E7A</color>
+
+    <!-- UI Elements -->
+    <color name="fpv_button_normal">#263238</color>
+    <color name="fpv_button_pressed">#37474F</color>
+    <color name="fpv_divider">#1F2A33</color>
+</resources>
